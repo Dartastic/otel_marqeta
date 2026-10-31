@@ -1,11 +1,12 @@
-// Licensed under the Dartastic Pro Software License Agreement.
+// Licensed under the Apache License, Version 2.0
 // Copyright 2025-2026 Mindful Software LLC d/b/a Dartastic.io, All rights reserved.
 
-import 'package:dartastic_opentelemetry/dartastic_opentelemetry.dart';
+import 'package:dartastic_opentelemetry_api/dartastic_opentelemetry_api.dart';
 
 import 'otel_marqeta_suppression.dart';
 
 class MarqetaResult {
+  /// Creates a result.
   const MarqetaResult({
     this.environment,
     this.programShortCode,
@@ -63,8 +64,13 @@ class MarqetaResult {
   final String? errorMessage;
 }
 
+/// What a traced call returned: the value for the caller plus fields
+/// recorded on the span.
 class MarqetaCallResult<T> {
+  /// Creates a call result.
   const MarqetaCallResult({required this.value, this.result});
+
+  /// The value returned to the caller.
   final T value;
   final MarqetaResult? result;
 }
@@ -72,139 +78,146 @@ class MarqetaCallResult<T> {
 Future<T> tracedMarqeta<T>({
   required String operation,
   required Future<MarqetaCallResult<T>> Function() invoke,
-  Tracer? tracer,
+  APITracer? tracer,
 }) async {
   if (marqetaInstrumentationSuppressed()) {
     final r = await invoke();
     return r.value;
   }
-  final t = tracer ?? OTel.tracerProvider().getTracer('otel_marqeta');
+  final t = tracer ?? OTelAPI.tracerProvider().getTracer('otel_marqeta');
   final span = t.startSpan('marqeta $operation', kind: SpanKind.client);
   try {
     span.addAttributes(
-        OTel.attributes([OTel.attributeString('rpc.system', 'marqeta')]));
+        OTelAPI.attributes([OTelAPI.attributeString('rpc.system', 'marqeta')]));
     span.addAttributes(
-        OTel.attributes([OTel.attributeString('rpc.method', operation)]));
+        OTelAPI.attributes([OTelAPI.attributeString('rpc.method', operation)]));
     final r = await invoke();
     final res = r.result;
     if (res != null) {
       if (res.environment != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('marqeta.environment', res.environment!)]));
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeString('marqeta.environment', res.environment!)
+        ]));
       }
       if (res.programShortCode != null) {
-        span.addAttributes(OTel.attributes([
-          OTel.attributeString(
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeString(
               'marqeta.program.short_code', res.programShortCode!)
         ]));
       }
       if (res.surface != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('marqeta.surface', res.surface!)]));
+        span.addAttributes(OTelAPI.attributes(
+            [OTelAPI.attributeString('marqeta.surface', res.surface!)]));
       }
       if (res.cardProductToken != null) {
-        span.addAttributes(OTel.attributes([
-          OTel.attributeString(
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeString(
               'marqeta.card_product.token', res.cardProductToken!)
         ]));
       }
       if (res.cardToken != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('marqeta.card.token', res.cardToken!)]));
+        span.addAttributes(OTelAPI.attributes(
+            [OTelAPI.attributeString('marqeta.card.token', res.cardToken!)]));
       }
       if (res.cardState != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('marqeta.card.state', res.cardState!)]));
+        span.addAttributes(OTelAPI.attributes(
+            [OTelAPI.attributeString('marqeta.card.state', res.cardState!)]));
       }
       if (res.cardFulfillmentState != null) {
-        span.addAttributes(OTel.attributes([
-          OTel.attributeString(
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeString(
               'marqeta.card.fulfillment_state', res.cardFulfillmentState!)
         ]));
       }
       if (res.cardLast4 != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('marqeta.card.last4', res.cardLast4!)]));
+        span.addAttributes(OTelAPI.attributes(
+            [OTelAPI.attributeString('marqeta.card.last4', res.cardLast4!)]));
       }
       if (res.userToken != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('marqeta.user.token', res.userToken!)]));
+        span.addAttributes(OTelAPI.attributes(
+            [OTelAPI.attributeString('marqeta.user.token', res.userToken!)]));
       }
       if (res.kycResult != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('marqeta.kyc.result', res.kycResult!)]));
+        span.addAttributes(OTelAPI.attributes(
+            [OTelAPI.attributeString('marqeta.kyc.result', res.kycResult!)]));
       }
       if (res.kycReasonCode != null) {
-        span.addAttributes(OTel.attributes([
-          OTel.attributeString('marqeta.kyc.reason_code', res.kycReasonCode!)
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeString('marqeta.kyc.reason_code', res.kycReasonCode!)
         ]));
       }
       if (res.transactionToken != null) {
-        span.addAttributes(OTel.attributes([
-          OTel.attributeString(
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeString(
               'marqeta.transaction.token', res.transactionToken!)
         ]));
       }
       if (res.transactionType != null) {
-        span.addAttributes(OTel.attributes([
-          OTel.attributeString('marqeta.transaction.type', res.transactionType!)
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeString(
+              'marqeta.transaction.type', res.transactionType!)
         ]));
       }
       if (res.transactionState != null) {
-        span.addAttributes(OTel.attributes([
-          OTel.attributeString(
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeString(
               'marqeta.transaction.state', res.transactionState!)
         ]));
       }
       if (res.transactionResponseCode != null) {
-        span.addAttributes(OTel.attributes([
-          OTel.attributeString(
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeString(
               'marqeta.transaction.response_code', res.transactionResponseCode!)
         ]));
       }
       if (res.networkCode != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('marqeta.network.code', res.networkCode!)]));
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeString('marqeta.network.code', res.networkCode!)
+        ]));
       }
       if (res.amountMicros != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeInt('marqeta.amount.micros', res.amountMicros!)]));
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeInt('marqeta.amount.micros', res.amountMicros!)
+        ]));
       }
       if (res.currencyCode != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('marqeta.currency', res.currencyCode!)]));
+        span.addAttributes(OTelAPI.attributes(
+            [OTelAPI.attributeString('marqeta.currency', res.currencyCode!)]));
       }
       if (res.mcc != null) {
-        span.addAttributes(
-            OTel.attributes([OTel.attributeString('marqeta.mcc', res.mcc!)]));
+        span.addAttributes(OTelAPI.attributes(
+            [OTelAPI.attributeString('marqeta.mcc', res.mcc!)]));
       }
       if (res.merchantCountry != null) {
-        span.addAttributes(OTel.attributes([
-          OTel.attributeString('marqeta.merchant.country', res.merchantCountry!)
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeString(
+              'marqeta.merchant.country', res.merchantCountry!)
         ]));
       }
       if (res.acquirerCountry != null) {
-        span.addAttributes(OTel.attributes([
-          OTel.attributeString('marqeta.acquirer.country', res.acquirerCountry!)
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeString(
+              'marqeta.acquirer.country', res.acquirerCountry!)
         ]));
       }
       if (res.gpaOrderState != null) {
-        span.addAttributes(OTel.attributes([
-          OTel.attributeString('marqeta.gpa_order.state', res.gpaOrderState!)
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeString('marqeta.gpa_order.state', res.gpaOrderState!)
         ]));
       }
       if (res.disputeState != null) {
-        span.addAttributes(OTel.attributes([
-          OTel.attributeString('marqeta.dispute.state', res.disputeState!)
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeString('marqeta.dispute.state', res.disputeState!)
         ]));
       }
       if (res.statusCode != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeInt('http.response.status_code', res.statusCode!)]));
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeInt('http.response.status_code', res.statusCode!)
+        ]));
       }
       if (res.errorCode != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('marqeta.error.code', res.errorCode!)]));
+        span.addAttributes(OTelAPI.attributes(
+            [OTelAPI.attributeString('marqeta.error.code', res.errorCode!)]));
       }
       // Failed transactions are business outcomes for non-DECLINED states;
       // span error only on HTTP/API errors and KYC FAILURE.
@@ -212,9 +225,9 @@ Future<T> tracedMarqeta<T>({
           (res.statusCode != null && res.statusCode! >= 400) ||
           res.kycResult == 'FAILURE';
       if (fail) {
-        span.addAttributes(OTel.attributes([
-          OTel.attributeString(
-              ErrorResource.errorType.key, res.errorCode ?? 'marqeta.error')
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeString(
+              ErrorAttributes.errorType.key, res.errorCode ?? 'marqeta.error')
         ]));
         span.setStatus(SpanStatusCode.Error, res.errorMessage);
       }
